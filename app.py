@@ -1,4 +1,5 @@
 import streamlit as st
+st.image("logo.jpg")
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
