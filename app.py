@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import random
 
 from datetime import datetime
 from reportlab.lib.pagesizes import A4
@@ -14,7 +15,7 @@ from reportlab.lib.units import mm
 # =========================================================
 
 st.set_page_config(
-    page_title="Milk Tea Billing",
+    page_title="Milk Tea Buddy",
     page_icon="🧋",
     layout="centered"
 )
@@ -32,15 +33,15 @@ if os.path.exists("logo.JPG"):
 # TIÊU ĐỀ
 # =========================================================
 
-st.title("🧋 QUẢN LÝ HÓA ĐƠN TRÀ SỮA")
+st.title("🧋 MILK TEA BUDDY")
 
 st.write(
-    "Chọn món, topping và tùy chỉnh đường - đá để tính hóa đơn."
+    "✨ Trợ lý chọn món trà sữa dành riêng cho bạn!"
 )
 
 
 # =========================================================
-# MENU TRÀ SỮA
+# MENU
 # =========================================================
 
 menu = {
@@ -70,74 +71,248 @@ toppings = {
 
 
 # =========================================================
+# GỢI Ý THEO TÂM TRẠNG
+# =========================================================
+
+mood_menu = {
+
+    "sweet": [
+        "Trà sữa truyền thống",
+        "Trà sữa socola",
+        "Trà sữa khoai môn",
+        "Trà sữa trân châu đường đen"
+    ],
+
+    "fresh": [
+        "Trà đào",
+        "Trà vải",
+        "Trà chanh"
+    ],
+
+    "strong": [
+        "Trà sữa socola",
+        "Trà sữa matcha",
+        "Trà sữa trân châu đường đen"
+    ]
+}
+
+
+# =========================================================
 # SESSION STATE
 # =========================================================
 
 if "cart" not in st.session_state:
     st.session_state.cart = []
 
-if "start_order" not in st.session_state:
-    st.session_state.start_order = False
+if "mood_selected" not in st.session_state:
+    st.session_state.mood_selected = False
+
+if "selected_mood" not in st.session_state:
+    st.session_state.selected_mood = ""
+
+if "recommended_drink" not in st.session_state:
+    st.session_state.recommended_drink = None
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 
 # =========================================================
-# CHATBOT CHÀO KHÁCH
+# CHATBOT
 # =========================================================
 
 st.divider()
 
-st.subheader("🤖 TRỢ LÝ TRÀ SỮA")
+st.subheader("🤖 MILK TEA BUDDY")
+
+
+# ---------------------------------------------------------
+# LỜI CHÀO
+# ---------------------------------------------------------
 
 st.info(
-    "👋 **Chào bạn!**\n\n"
-    "Mình là trợ lý của Milk Tea Shop. 🧋\n\n"
-    "Hôm nay bạn muốn uống gì?\n\n"
-    "Hãy chọn món yêu thích nhé!"
+    "👋 **HEYYY! Chào bạn!** 🥰\n\n"
+    "Mình là Milk Tea Buddy – trợ lý chọn trà sữa của bạn.\n\n"
+    "Hôm nay chưa biết uống gì đúng không? 😆\n\n"
+    "**Đừng lo, để mình chọn giúp!** 🧋"
 )
 
 
 # =========================================================
-# NÚT CHỌN MÓN NGAY
+# CHỌN TÂM TRẠNG
 # =========================================================
 
-if not st.session_state.start_order:
+if not st.session_state.mood_selected:
 
-    if st.button(
-        "🧋 CHỌN MÓN NGAY",
-        type="primary",
-        use_container_width=True
-    ):
+    st.write("### 💭 Hôm nay bạn đang trong mood nào?")
 
-        st.session_state.start_order = True
 
-        st.rerun()
+    col1, col2 = st.columns(2)
+
+
+    with col1:
+
+        if st.button(
+            "😍 Muốn ngọt ngào",
+            use_container_width=True
+        ):
+
+            st.session_state.mood_selected = True
+            st.session_state.selected_mood = "sweet"
+
+            st.session_state.recommended_drink = random.choice(
+                mood_menu["sweet"]
+            )
+
+            st.rerun()
+
+
+    with col2:
+
+        if st.button(
+            "🌿 Muốn thanh mát",
+            use_container_width=True
+        ):
+
+            st.session_state.mood_selected = True
+            st.session_state.selected_mood = "fresh"
+
+            st.session_state.recommended_drink = random.choice(
+                mood_menu["fresh"]
+            )
+
+            st.rerun()
+
+
+    col3, col4 = st.columns(2)
+
+
+    with col3:
+
+        if st.button(
+            "🍫 Hôm nay phải đậm vị",
+            use_container_width=True
+        ):
+
+            st.session_state.mood_selected = True
+            st.session_state.selected_mood = "strong"
+
+            st.session_state.recommended_drink = random.choice(
+                mood_menu["strong"]
+            )
+
+            st.rerun()
+
+
+    with col4:
+
+        if st.button(
+            "🎲 Chọn đại đi!",
+            use_container_width=True
+        ):
+
+            st.session_state.mood_selected = True
+
+            st.session_state.selected_mood = "random"
+
+            st.session_state.recommended_drink = random.choice(
+                list(menu.keys())
+            )
+
+            st.rerun()
 
 
 # =========================================================
-# KHU VỰC CHỌN MÓN
+# KẾT QUẢ GỢI Ý
 # =========================================================
 
-if st.session_state.start_order:
+if st.session_state.mood_selected:
+
+    drink = st.session_state.recommended_drink
 
     st.success(
-        "🥰 Tuyệt vời! Cùng chọn món yêu thích của bạn nhé!"
+        "🎉 **Tadaaaa! Mình tìm được món cho bạn rồi!**"
     )
+
+
+    st.markdown(
+        f"""
+        ### 🧋 {drink}
+
+        💰 **{menu[drink]:,} VNĐ / ly**
+
+        ✨ Một lựa chọn khá ổn áp cho hôm nay đó nha! 😆
+        """
+    )
+
+
+    # -----------------------------------------------------
+    # NÚT CHỌN MÓN
+    # -----------------------------------------------------
+
+    col1, col2 = st.columns(2)
+
+
+    with col1:
+
+        if st.button(
+            "💖 CHỌN MÓN NÀY",
+            type="primary",
+            use_container_width=True
+        ):
+
+            st.session_state.selected_drink = drink
+
+            st.session_state.show_customize = True
+
+
+    with col2:
+
+        if st.button(
+            "🎲 CHỌN LẠI",
+            use_container_width=True
+        ):
+
+            st.session_state.recommended_drink = random.choice(
+                list(menu.keys())
+            )
+
+            st.rerun()
+
+
+# =========================================================
+# KHỞI TẠO TRẠNG THÁI TÙY CHỈNH
+# =========================================================
+
+if "show_customize" not in st.session_state:
+    st.session_state.show_customize = False
+
+
+# =========================================================
+# TÙY CHỈNH MÓN
+# =========================================================
+
+if st.session_state.show_customize:
 
     st.divider()
 
-    # -----------------------------------------------------
-    # CHỌN MÓN
-    # -----------------------------------------------------
+    st.subheader("🧋 CUSTOM LY CỦA BẠN")
 
-    st.subheader("🧋 1. CHỌN MÓN")
 
-    drink = st.selectbox(
-        "Bạn muốn uống gì?",
-        list(menu.keys())
+    selected_drink = st.session_state.selected_drink
+
+
+    st.markdown(
+        f"### 🥤 {selected_drink}"
     )
 
+
+    # -----------------------------------------------------
+    # SỐ LƯỢNG
+    # -----------------------------------------------------
+
     quantity = st.number_input(
-        "Số lượng ly",
+        "🥤 Bạn muốn mấy ly?",
         min_value=1,
         max_value=20,
         value=1,
@@ -146,20 +321,37 @@ if st.session_state.start_order:
 
 
     # -----------------------------------------------------
-    # TÙY CHỈNH
+    # ĐƯỜNG
     # -----------------------------------------------------
 
-    st.subheader("🍬 2. TÙY CHỈNH")
+    st.write("### 🍬 Độ ngọt thế nào?")
+
 
     sugar = st.radio(
-        "Mức độ đường",
-        ["100%", "70%", "Không đường"],
+        "Chọn mức đường:",
+        [
+            "100% – Ngọt hết nấc 😍",
+            "70% – Vừa miệng 😋",
+            "Không đường – Thanh nhẹ 🌿"
+        ],
         horizontal=True
     )
 
+
+    # -----------------------------------------------------
+    # ĐÁ
+    # -----------------------------------------------------
+
+    st.write("### 🧊 Còn đá thì sao?")
+
+
     ice = st.radio(
-        "Mức độ đá",
-        ["100%", "70%", "Không đá"],
+        "Chọn mức đá:",
+        [
+            "100% – Đá đầy ❄️",
+            "70% – Vừa đủ 🧊",
+            "Không đá – Team không đá 🚫"
+        ],
         horizontal=True
     )
 
@@ -168,16 +360,17 @@ if st.session_state.start_order:
     # TOPPING
     # -----------------------------------------------------
 
-    st.subheader("🧋 3. CHỌN TOPPING")
+    st.write("### 🧋 Cho ly này thêm chút 'phụ kiện' không? 👀")
+
 
     selected_toppings = st.multiselect(
-        "Bạn muốn thêm topping nào?",
+        "Chọn topping:",
         list(toppings.keys())
     )
 
 
     # -----------------------------------------------------
-    # TÍNH GIÁ TRƯỚC KHI THÊM
+    # TÍNH TIỀN
     # -----------------------------------------------------
 
     topping_price = sum(
@@ -185,64 +378,131 @@ if st.session_state.start_order:
         for item in selected_toppings
     )
 
-    unit_price = menu[drink] + topping_price
 
-    total_price = unit_price * quantity
-
-
-    st.write(
-        f"💰 **Đơn giá:** {unit_price:,} VNĐ/ly"
+    unit_price = (
+        menu[selected_drink]
+        + topping_price
     )
 
-    st.write(
-        f"💵 **Thành tiền:** {total_price:,} VNĐ"
+
+    total_price = (
+        unit_price
+        * quantity
     )
 
 
     # -----------------------------------------------------
-    # THÊM VÀO HÓA ĐƠN
+    # HIỂN THỊ TẠM TÍNH
     # -----------------------------------------------------
 
-    if st.button(
-        "➕ THÊM VÀO HÓA ĐƠN",
-        use_container_width=True
-    ):
+    st.divider()
 
-        item = {
-            "drink": drink,
-            "quantity": quantity,
-            "sugar": sugar,
-            "ice": ice,
-            "toppings": selected_toppings.copy(),
-            "unit_price": unit_price,
-            "total_price": total_price
-        }
+    st.markdown("### ✨ LY CỦA BẠN")
 
-        st.session_state.cart.append(item)
 
-        st.success(
-            "✅ Đã thêm món vào hóa đơn!"
+    st.write(
+        f"🧋 **Món:** {selected_drink}"
+    )
+
+    st.write(
+        f"🔢 **Số lượng:** {quantity} ly"
+    )
+
+    st.write(
+        f"🍬 **Đường:** {sugar}"
+    )
+
+    st.write(
+        f"🧊 **Đá:** {ice}"
+    )
+
+
+    if selected_toppings:
+
+        st.write(
+            "🧋 **Topping:** "
+            + ", ".join(selected_toppings)
+        )
+
+    else:
+
+        st.write(
+            "🧋 **Topping:** Không"
         )
 
 
+    st.markdown(
+        f"## 💰 TỔNG: {total_price:,} VNĐ"
+    )
+
+
+    # -----------------------------------------------------
+    # CHỐT MÓN
+    # -----------------------------------------------------
+
+    if st.button(
+        "💖 CHỐT MÓN NÀY!",
+        type="primary",
+        use_container_width=True
+    ):
+
+
+        item = {
+
+            "drink": selected_drink,
+
+            "quantity": quantity,
+
+            "sugar": sugar,
+
+            "ice": ice,
+
+            "toppings": selected_toppings.copy(),
+
+            "unit_price": unit_price,
+
+            "total_price": total_price
+        }
+
+
+        st.session_state.cart.append(item)
+
+
+        st.session_state.show_customize = False
+
+
+        st.success(
+            "🎉 YESSS! Món của bạn đã được thêm vào hóa đơn! 🧋"
+        )
+
+
+        st.balloons()
+
+
+        st.rerun()
+
+
 # =========================================================
-# HIỂN THỊ HÓA ĐƠN
+# HÓA ĐƠN
 # =========================================================
 
 st.divider()
 
-st.subheader("🧾 HÓA ĐƠN")
+st.subheader("🧾 HÓA ĐƠN CỦA BẠN")
 
 
 if len(st.session_state.cart) == 0:
 
     st.info(
-        "Chưa có món nào trong hóa đơn."
+        "🧋 Hóa đơn đang trống...\n\n"
+        "Chọn một món thật ngon để bắt đầu nhé! 😋"
     )
+
 
 else:
 
     grand_total = 0
+
 
     for i, item in enumerate(
         st.session_state.cart
@@ -252,21 +512,29 @@ else:
             f"### {i + 1}. {item['drink']}"
         )
 
+
         st.write(
-            f"**Số lượng:** "
+            f"🔢 Số lượng: "
             f"{item['quantity']} ly"
         )
 
+
         st.write(
-            f"**Đường:** {item['sugar']} | "
-            f"**Đá:** {item['ice']}"
+            f"🍬 Đường: "
+            f"{item['sugar']}"
+        )
+
+
+        st.write(
+            f"🧊 Đá: "
+            f"{item['ice']}"
         )
 
 
         if item["toppings"]:
 
             st.write(
-                "**Topping:** "
+                "🧋 Topping: "
                 + ", ".join(
                     item["toppings"]
                 )
@@ -275,22 +543,24 @@ else:
         else:
 
             st.write(
-                "**Topping:** Không"
+                "🧋 Topping: Không"
             )
 
 
         st.write(
-            f"**Đơn giá:** "
+            f"💰 Đơn giá: "
             f"{item['unit_price']:,} VNĐ/ly"
         )
 
+
         st.write(
-            f"**Thành tiền:** "
+            f"💵 Thành tiền: "
             f"{item['total_price']:,} VNĐ"
         )
 
 
         grand_total += item["total_price"]
+
 
         st.divider()
 
@@ -314,6 +584,10 @@ if len(st.session_state.cart) > 0:
 
         st.session_state.cart = []
 
+        st.success(
+            "🧹 Đã dọn sạch hóa đơn!"
+        )
+
         st.rerun()
 
 
@@ -325,10 +599,12 @@ def create_invoice(cart):
 
     now = datetime.now()
 
+
     filename = (
         f"hoa_don_"
         f"{now.strftime('%Y%m%d_%H%M%S')}.pdf"
     )
+
 
     filepath = os.path.join(
         "/tmp",
@@ -337,21 +613,28 @@ def create_invoice(cart):
 
 
     # -----------------------------------------------------
-    # FONT TIẾNG VIỆT
+    # FONT
     # -----------------------------------------------------
 
     font_path = "DejaVuSans.ttf"
 
+
     if os.path.exists(font_path):
 
-        pdfmetrics.registerFont(
-            TTFont(
-                "DejaVuSans",
-                font_path
-            )
-        )
+        try:
 
-        font_name = "DejaVuSans"
+            pdfmetrics.registerFont(
+                TTFont(
+                    "DejaVuSans",
+                    font_path
+                )
+            )
+
+            font_name = "DejaVuSans"
+
+        except:
+
+            font_name = "Helvetica"
 
     else:
 
@@ -367,7 +650,9 @@ def create_invoice(cart):
         pagesize=A4
     )
 
+
     width, height = A4
+
 
     y = height - 25 * mm
 
@@ -381,6 +666,7 @@ def create_invoice(cart):
         18
     )
 
+
     pdf.drawCentredString(
         width / 2,
         y,
@@ -390,19 +676,22 @@ def create_invoice(cart):
 
     y -= 10 * mm
 
+
     pdf.setFont(
         font_name,
         10
     )
 
+
     pdf.drawCentredString(
         width / 2,
         y,
-        "Milk Tea Shop"
+        "Milk Tea Buddy"
     )
 
 
     y -= 10 * mm
+
 
     pdf.line(
         20 * mm,
@@ -424,29 +713,35 @@ def create_invoice(cart):
         10
     )
 
+
     pdf.drawString(
         20 * mm,
         y,
-        f"Thoi gian: "
-        f"{now.strftime('%d/%m/%Y %H:%M:%S')}"
+        "Thoi gian: "
+        + now.strftime(
+            "%d/%m/%Y %H:%M:%S"
+        )
     )
 
 
     y -= 10 * mm
 
+
     grand_total = 0
 
 
     # -----------------------------------------------------
-    # CHI TIẾT HÓA ĐƠN
+    # CHI TIẾT
     # -----------------------------------------------------
 
     for index, item in enumerate(cart):
+
 
         pdf.setFont(
             font_name,
             11
         )
+
 
         pdf.drawString(
             20 * mm,
@@ -458,10 +753,12 @@ def create_invoice(cart):
 
         y -= 6 * mm
 
+
         pdf.setFont(
             font_name,
             9
         )
+
 
         pdf.drawString(
             25 * mm,
@@ -473,12 +770,23 @@ def create_invoice(cart):
 
         y -= 5 * mm
 
+
         pdf.drawString(
             25 * mm,
             y,
             f"Duong: "
-            f"{item['sugar']} | "
-            f"Da: {item['ice']}"
+            f"{item['sugar']}"
+        )
+
+
+        y -= 5 * mm
+
+
+        pdf.drawString(
+            25 * mm,
+            y,
+            f"Da: "
+            f"{item['ice']}"
         )
 
 
@@ -515,6 +823,7 @@ def create_invoice(cart):
 
         y -= 8 * mm
 
+
         grand_total += item["total_price"]
 
 
@@ -532,10 +841,12 @@ def create_invoice(cart):
 
     y -= 10 * mm
 
+
     pdf.setFont(
         font_name,
         14
     )
+
 
     pdf.drawString(
         20 * mm,
@@ -547,10 +858,12 @@ def create_invoice(cart):
 
     y -= 15 * mm
 
+
     pdf.setFont(
         font_name,
         10
     )
+
 
     pdf.drawCentredString(
         width / 2,
@@ -560,6 +873,7 @@ def create_invoice(cart):
 
 
     pdf.save()
+
 
     return filepath, filename
 
@@ -576,10 +890,11 @@ if len(st.session_state.cart) > 0:
 
 
     if st.button(
-        "💰 THANH TOÁN",
+        "💰 THANH TOÁN NGAY",
         type="primary",
         use_container_width=True
     ):
+
 
         filepath, filename = create_invoice(
             st.session_state.cart
@@ -591,8 +906,9 @@ if len(st.session_state.cart) > 0:
             "rb"
         ) as file:
 
+
             st.download_button(
-                label="📄 TẢI HÓA ĐƠN",
+                label="📄 TẢI HÓA ĐƠN PDF",
                 data=file,
                 file_name=filename,
                 mime="application/pdf",
@@ -601,6 +917,6 @@ if len(st.session_state.cart) > 0:
 
 
         st.success(
-            "✅ Thanh toán thành công! "
-            "Bạn có thể tải hóa đơn PDF."
+            "🎉 Thanh toán thành công! "
+            "Cảm ơn bạn đã ghé Milk Tea Buddy! 🧋🥰"
         )
